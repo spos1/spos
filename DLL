@@ -41,3 +41,47 @@ class B1
     while(ch<5);    
     }
 }
+
+
+
+
+C program for compiling and run the java code -:
+
+#include<stdio.h>
+#include<jni.h>
+#include "Cal.h"
+
+JNIEXPORT int JNICALL Java_B1_add(JNIEnv *env, jobject obj, jint a, jint b)
+{
+	printf("\n%d+%d=%d",a,b,(a+b));
+	return;
+}
+
+JNIEXPORT int JNICALL Java_B1_sub(JNIEnv *env, jobject obj, jint a, jint b)
+{
+ 	printf("\n%d-%d=%d",a,b,(a-b));
+	return;
+}
+
+JNIEXPORT int JNICALL Java_B1_mult(JNIEnv *env, jobject obj, jint a, jint b)
+{
+	printf("\n%d*%d=%d",a,b,(a*b));
+	return;
+}
+
+JNIEXPORT int JNICALL Java_B1_div(JNIEnv *env, jobject obj, jint a, jint b)
+{
+	printf("\n%d/%d=%d",a,b,(a/b));
+	return;
+}
+
+
+Output :
+
+Enter value of a : 9
+Enter value of b : 3
+
+9 + 3 = 12
+9 - 3 = 6
+9 * 3 = 27
+9 / 3 = 3
