@@ -1,78 +1,60 @@
-import java.io.*;
 import java.util.*;
+import java.util.Scanner;
 
-class B1
-{
-	static
-	{
-		 System.loadLibrary("B1");
-	}
-
-	private native int add(int a,int b);
-	private native int sub(int a,int b); 
-	private native int mult(int a,int b);	
-	private native int div(int a,int b);
-
-	public static void main(String[] args)
-	{
-		Scanner sc=new Scanner(System.in);
-		int a,b;
-		System.out.println("\nEnter value of a:");
-		a=sc.nextInt();
-		System.out.println("\nEnter value of b:");
-		a=sc.nextInt();
-		do
-	    {
-		System.out.println("\nENTER YOUR CHOICE : ");
-		ch = sc.nextInt();
-      	switch(ch)
-		{
-			case 1 : new B1().add(a,b);
-				 break;
-			case 2 : new B1().sub(a,b);
-				 break;
-			case 3 : new B1().mult(a,b);
-				 break;
-			case 4 : new B1().div(a,b);
-				 break;
-			default : System.out.println("Your choice is wrong.");
-	    }
-	}
-    while(ch<5);    
-    }
+public class b1 {  
+   static {
+      System.loadLibrary("b1"); 
+                                   
+   }
+ 
+  
+   private native void add(int a , int b);
+   private native void sub(int a, int b);
+   private native void mult(int a, int b);
+   private native void div(int a, int b);
+ 
+   // Test Driver
+   public static void main(String[] args) {
+      Scanner sc = new Scanner(System.in);
+      System.out.println("Enter value for a: ");
+      int a = sc.nextInt();
+      System.out.println("Enter value for b: ");
+      int b = sc.nextInt();
+      
+      
+      new b1().add(a,b);  
+      new b1().sub(a,b);
+      new b1().mult(a,b);
+      new b1().div(a,b);
+   }
 }
-
 
 
 
 C program for compiling and run the java code -:
 
-#include<stdio.h>
-#include<jni.h>
-#include "Cal.h"
-
+#include <jni.h>
+#include <stdio.h>
+#include "B1.h"
 JNIEXPORT int JNICALL Java_B1_add(JNIEnv *env, jobject obj, jint a, jint b)
 {
-	printf("\n%d+%d=%d",a,b,(a+b));
-	return;
+printf("\n%d + %d = %d\n",a,b,(a+b));
+return;
 }
-
 JNIEXPORT int JNICALL Java_B1_sub(JNIEnv *env, jobject obj, jint a, jint b)
 {
- 	printf("\n%d-%d=%d",a,b,(a-b));
-	return;
+ printf("\n%d - %d = %d\n",a,b,(a-b));
+ return;
 }
-
 JNIEXPORT int JNICALL Java_B1_mult(JNIEnv *env, jobject obj, jint a, jint b)
 {
-	printf("\n%d*%d=%d",a,b,(a*b));
-	return;
+ printf("\n%d * %d = %d\n",a,b,(a*b));
+ return;
 }
-
 JNIEXPORT int JNICALL Java_B1_div(JNIEnv *env, jobject obj, jint a, jint b)
 {
-	printf("\n%d/%d=%d",a,b,(a/b));
-	return;
+ printf("\n%d / %d = %d\n",a,b,(a/b));
+ return;
 }
 
 locate openjdk
