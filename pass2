@@ -1,0 +1,112 @@
+Pass 2 Assembler Code: -
+mnemonics={'STOP':('00','IS',0),'ADD':('01','IS',2),'SUB':('02','IS',2),'MUL':
+('03','IS',2),'MOVER':('04','IS',2),'MOVEM':('05','IS',2),'COMP':('06','IS',2),'BC':
+('07','IS',2),'DIV':('08','IS',2),'READ':('09','IS',1),'PRINT':('10','IS',1)}
+REG=['AREG','BREG','CREG','DREG'] 
+sourcecodeaddr="Sourcecode.txt"
+file=open(sourcecodeaddr)
+l=[]
+ic=[]
+literal=[]
+symbol=[]
+pooltab=[]
+littab=[]
+symtab=[]
+symindex=0
+poolindex=0
+LC=0
+def END():
+global literal,littab,LC
+for i in range(len(literal)):
+if("**" in littab[i]):
+pooltab.append(i)
+if(literal[i]!=''):
+str3=literal[i]
+littab.append(str3)
+def ORIGIN(addr):
+global LC,ic
+string=('(AD,03)(C,'+str(addr)+')')
+ic.append(string)
+LC =int(addr)
+def LTORG():
+global LC
+global literal,littab
+for i in range(len(literal)):
+str3=literal[i]
+littab.append(str3)
+literal[i]=''
+littab.append("**")
+def DS(size):
+global LC
+string=('(DL,01)'+','+'(C,'+size+')')
+ic.append(string)
+LC=LC+int(size)
+def DC(value):
+global LC
+string=('(DL,02)'+','+'(C,'+value+')')
+ic.append(string)
+LC+=1
+def OTHERS(word,k):
+global LC
+global literal,littab
+global symtab,symindex,REG
+z=mnemonics[word[0]]
+newstr1='('+z[1]+","+z[0]+')'
+if (word[1].replace(',','')) in REG:
+newstr1+=','+str(REG.index(word[1].replace(',','')))+','
+if word[2][0]=="=":
+strl=(word[2]+str(LC))
+literal.append(strl)
+newstr1+='(L,'+str(word[2])+')'
+else:
+if word[2] not in symtab:
+str2=(symindex,word[2],LC)
+symtab.append(str2)
+newstr1+='(S,'+str(symindex)+')'
+symindex+=1
+ic.append(newstr1)
+LC+=1
+for line in file:
+words=line.split()
+l.append(words)
+for i in l:
+for j in range(len(i)):
+if i[j]=='START':
+LC=int(i[j+1])
+str1='(AD,01)'+','+'(C,'+i[j+1]+')'
+ic.append(str1)
+elif i[j]=='END':
+ic.append('(AD,02)')
+END()
+elif i[j]=='ORIGIN':
+ORIGIN(i[j+1])
+elif i[j]=="LTORG":
+LTORG()
+ic.append('(AD,05)')
+elif i[j]=='DS':
+DS(i[j+1])
+elif i[j]=='DC':
+DC(i[j+1])
+elif i[j] in mnemonics:
+OTHERS(i[j:j+3],j)
+k=0
+targetcode=[]
+(ic,littab,pooltab,symtab,mot,addr)=pass1.returndata()
+file=open(addr)
+for i in range(len(ic)):
+word=ic[i]
+str1=word[4:6]
+if(word[1:3]=='IS'):
+str2=word[8]
+w=word[10:13].replace(',','').replace(')','').replace('(','')
+if(w=='S'):
+str3=symtab[int(word[-2])]
+targetcode.append(str1+','+str2+','+str(str3[2]))
+elif(w=='L'):
+if(littab[k]=='**'):
+k+=1
+targetcode.append(str1+','+str2+','+littab[k][4:7])
+k+=1
+print("The target code is: ")
+for i in targetcode:
+print(i)
