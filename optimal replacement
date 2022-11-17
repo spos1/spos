@@ -1,0 +1,61 @@
+stream=[]
+frame=[]
+displaymat=[[]]
+pagefault=[]
+index=0
+pagecount=[]
+streamsize=int(input("Enter stream size:"))
+for i in range(streamsize):
+entry=int(input("Enter the page:"))
+stream.append(entry)
+framesize=int(input("Enter the frame size: "))
+for i in range(framesize):
+frame.append(0)
+pagecount.append(0)
+def operate(stream,frame):
+for i,page in enumerate(stream):
+count=0
+pg=0
+if(page in frame):
+pagefault.append('H')
+index=frame.index(page)
+print(frame)
+count+=1
+pg+=1
+pagecount[index]=pg
+else:
+if(0 in frame):
+index=frame.index(0)
+frame[index]=page
+pagefault.append('M')
+count+=1
+print(frame)
+else:
+j=pagecount.index(max(pagecount))
+pagecount[j]=0
+pagefault.append('M')
+frame[j]=page
+print(frame)
+return pagefault
+page=operate(stream,frame)
+hit=0
+for i in page:
+if(i=='H'):
+hit+=1
+print(page)
+print("hit ratio: ",hit/streamsize)
+Output: -
+Enter stream size:12
+Enter the page:2
+Enter the page:3
+Enter the page:4
+Enter the page:5
+Enter the page:1
+Enter the page:2
+Enter the page:2
+Enter the page:3
+Enter the page:3
+Enter the page:4
+Enter the page:4
+Enter the page:4
+Enter the frame size: 4
