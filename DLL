@@ -75,6 +75,8 @@ JNIEXPORT int JNICALL Java_B1_div(JNIEnv *env, jobject obj, jint a, jint b)
 	return;
 }
 
+locate openjdk
+
 javac b1.java
 javah b1 
 gcc -fPIC -I"jvm java8loc"-I"/jvm java8 linuxloc" -shared -o libb1.so b1.c(base)
