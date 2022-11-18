@@ -1,127 +1,176 @@
-Source code:
+import java.io.*;
+class SymTab
+{
+	public static void main(String args[])throws Exception
+	{
+		FileReader FP=new FileReader(args[0]);
+		BufferedReader bufferedReader = new BufferedReader(FP);		
+		
+		String line=null;
+		int line_count=0,LC=0,symTabLine=0,opTabLine=0,litTabLine=0,poolTabLine=0;
+		  
+		 //Data Structures
+		 final int MAX=100;
+		 String SymbolTab[][]=new String[MAX][3];
+		 String OpTab[][]=new String[MAX][3];
+		 String LitTab[][]=new String[MAX][2];
+		 int PoolTab[]=new int[MAX];
+		 int litTabAddress=0;
+/*---------------------------------------------------------------------------------------------------*/
+		 
+		 System.out.println("___________________________________________________");
+		    while((line = bufferedReader.readLine()) != null)
+		     {
+		     	 String[] tokens = line.split("\t");
+		     	if(line_count==0)
+		     	{
+		     		LC=Integer.parseInt(tokens[2]);					
+//set LC to operand of START
+		     		for(int i=0;i<tokens.length;i++)		//for printing the input program
+		     	 		System.out.print(tokens[i]+"\t");
+		     	 	System.out.println("");
+		     	}
+		     	else
+		     	{
+			     	 for(int i=0;i<tokens.length;i++) //for printing the input program
+			     	 	System.out.print(tokens[i]+"\t");
+			     	 System.out.println("");
+			     	if(!tokens[0].equals(""))
+			     	{
+			 
+			     		//Inserting into Symbol Table
+			     		SymbolTab[symTabLine][0]=tokens[0];
+			     		SymbolTab[symTabLine][1]=Integer.toString(LC);
+			     		SymbolTab[symTabLine][2]=Integer.toString(1);
+			     		symTabLine++;
+			     	}
+				else if(tokens[1].equalsIgnoreCase("DS")||tokens[1].equalsIgnoreCase("DC"))
+				{
+					//Entry into symbol table for declarative statements
+					SymbolTab[symTabLine][0]=tokens[0];
+			     		SymbolTab[symTabLine][1]=Integer.toString(LC);
+			     		SymbolTab[symTabLine][2]=Integer.toString(1);
+			     		symTabLine++;
+				}
 
-START 100
-A DC 10
- MOVER AREG, B
- MOVEM BREG, ='1'
- ADD AREG, ='2'
- SUB BREG, ='1'
-B DC 20
- ORIGIN 101
- LTORG
- MOVER AREG, NUM
- ADD AREG, ='9'
- MOVER CREG, LOOP
- ADD BREG, ='1'
-NUM DS 5
-LOOP DC 10
-END
+				if(tokens.length==3 && tokens[2].charAt(0)=='=')
+				{
+					//Entry of literals into literal table
+					LitTab[litTabLine][0]=tokens[2];
+			     		LitTab[litTabLine][1]=Integer.toString(LC);
+			     		litTabLine++;
+				}
+	
+				else if(tokens[1]!=null)
+				{
+						//Entry of Mnemonic in opcode table
+					OpTab[opTabLine][0]=tokens[1];
+					
+					if(tokens[1].equalsIgnoreCase("START")||tokens[1].equalsIgnoreCase("END")||tokens[1].equalsIgnoreCase("ORIGIN")||tokens[1].equalsIgnoreCase("EQU")||tokens[1].equalsIgnoreCase("LTORG"))		//if Assembler Directive
+					{
+			     			OpTab[opTabLine][1]="AD";
+						OpTab[opTabLine][2]="R11";					
+					}			     	
+					else if(tokens[1].equalsIgnoreCase("DS")||tokens[1].equalsIgnoreCase("DC"))
+					{
+						OpTab[opTabLine][1]="DL";
+						OpTab[opTabLine][2]="R7";					
+					}
+					else
+					{
+						OpTab[opTabLine][1]="IS";
+						OpTab[opTabLine][2]="(04,1)";
+					}
+			     	opTabLine++;
+				}
+		        }
+		        line_count++;
+		        LC++;
+		    }   
 
-Pass 1 Assembler Code: -
-mnemonics={'STOP':('00','IS',0),'ADD':('01','IS',2),'SUB':('02','IS',2),'MUL':
-('03','IS',2),'MOVER':('04','IS',2),'MOVEM':('05','IS',2),'COMP':('06','IS',2),'BC':
-('07','IS',2),'DIV':('08','IS',2),'READ':('09','IS',1),'PRINT':('10','IS',1)}
-REG=['AREG','BREG','CREG','DREG']
-sourcecodeaddr="Sourcecode.txt"
-file=open(sourcecodeaddr)
-l=[]
-ic=[]
-literal=[]
-symbol=[]
-pooltab=[]
-littab=[]
-symtab=[]
-symindex=0
-poolindex=0
-LC=0
-def END():
-global literal,littab,LC
-for i in range(len(literal)):
-if("**" in littab[i]):
-pooltab.append(i)
-if(literal[i]!=''):
-str3=literal[i]
-littab.append(str3)
-def ORIGIN(addr):
-global LC,ic
-string=('(AD,03)(C,'+str(addr)+')')
-ic.append(string)
-LC =int(addr)
-def LTORG():
-global LC
-global literal,littab
-for i in range(len(literal)):
-str3=literal[i]
-littab.append(str3)
-literal[i]=''
-littab.append("**")
-def DS(size):
-global LC
-string=('(DL,01)'+','+'(C,'+size+')')
-ic.append(string)
-LC=LC+int(size)
-def DC(value):
-global LC
-string=('(DL,02)'+','+'(C,'+value+')')
-ic.append(string)
-LC+=1
-def OTHERS(word,k):
-global LC
-global literal,littab
-global symtab,symindex,REG
-z=mnemonics[word[0]]
-newstr1='('+z[1]+","+z[0]+')'
-if (word[1].replace(',','')) in REG:
-newstr1+=','+str(REG.index(word[1].replace(',','')))+','
-if word[2][0]=="=":
-strl=(word[2]+str(LC))
-literal.append(strl)
-newstr1+='(L,'+str(word[2])+')'
-else:
-if word[2] not in symtab:
-str2=(symindex,word[2],LC)
-symtab.append(str2)
-newstr1+='(S,'+str(symindex)+')'
-symindex+=1
-ic.append(newstr1)
-LC+=1
-for line in file:
-words=line.split()
-l.append(words)
-for i in l:
-for j in range(len(i)):
-if i[j]=='START':
-LC=int(i[j+1])
-str1='(AD,01)'+','+'(C,'+i[j+1]+')'
-ic.append(str1)
-elif i[j]=='END':
-ic.append('(AD,02)')
-END()
-elif i[j]=='ORIGIN':
-ORIGIN(i[j+1])
-elif i[j]=="LTORG":
-LTORG()
-ic.append('(AD,05)')
-elif i[j]=='DS':
-DS(i[j+1])
-elif i[j]=='DC':
-DC(i[j+1])
-elif i[j] in mnemonics:
-OTHERS(i[j:j+3],j)
-def returndata():
-return ic,littab,pooltab,symtab,mnemonics,sourcecodeaddr
-def displayresult():
-global ic,symtab,littab,mnemonics,pooltab
-print("The ic table: ")
-for i in ic:
-print(i)
-print("The symbol table: ")
-for i in symtab:
-print(i)
-print("The Literal Table: ")
-for i in littab:
-print(i)
-print("The pooltables is: ")
-for i in pooltab:
-print(i)
-displayresult()
+			System.out.println("___________________________________________________");  
+
+			//print symbol table
+			System.out.println("\n\n	SYMBOL TABLE		");
+			System.out.println("--------------------------");			
+			System.out.println("SYMBOL\tADDRESS\tLENGTH");
+			System.out.println("--------------------------");			
+			for(int i=0;i<symTabLine;i++)
+				System.out.println(SymbolTab[i][0]+"\t"+SymbolTab[i][1]+"\t"+SymbolTab[i][2]);
+			System.out.println("--------------------------");
+
+
+			//print opcode table
+			System.out.println("\n\n	OPCODE TABLE		");
+			System.out.println("----------------------------");			
+			System.out.println("MNEMONIC\tCLASS\tINFO");
+			System.out.println("----------------------------");			
+			for(int i=0;i<opTabLine;i++)
+				System.out.println(OpTab[i][0]+"\t\t"+OpTab[i][1]+"\t"+OpTab[i][2]);
+			System.out.println("----------------------------");
+
+			//print literal table
+			System.out.println("\n\n   LITERAL TABLE		");
+			System.out.println("-----------------");			
+			System.out.println("LITERAL\tADDRESS");
+			System.out.println("-----------------");			
+			for(int i=0;i<litTabLine;i++)
+				System.out.println(LitTab[i][0]+"\t"+LitTab[i][1]);
+			System.out.println("------------------");
+	
+
+			//intialization of POOLTAB
+			for(int i=0;i<litTabLine;i++)
+			{
+				if(LitTab[i][0]!=null && LitTab[i+1][0]!=null ) //if literals are present
+				{
+					if(i==0)
+					{
+						PoolTab[poolTabLine]=i+1;
+						poolTabLine++;
+					}
+					else if(Integer.parseInt(LitTab[i][1])<(Integer.parseInt(LitTab[i+1][1]))-1)
+					{	
+						PoolTab[poolTabLine]=i+2;
+						poolTabLine++;
+					}
+				}
+			}
+			//print pool table
+			System.out.println("\n\n   POOL TABLE		");
+			System.out.println("-----------------");			
+			System.out.println("LITERAL NUMBER");
+			System.out.println("-----------------");			
+			for(int i=0;i<poolTabLine;i++)
+				System.out.println(PoolTab[i]);
+			System.out.println("------------------");
+			
+		
+		    // Always close files.
+		    bufferedReader.close();
+	}
+}
+
+/*
+OUTPUT-
+neha@neha-1011PX:~/neha_SPOS$ javac SymTab.java 
+neha@neha-1011PX:~/neha_SPOS$ java SymTab input.txt
+___________________________________________________
+	START	100	
+	READ	A	
+LABLE	MOVER	A,B	
+	LTORG	
+		='5'	
+		='1'	
+		='6'	
+		='7'	
+	MOVEM	A,B	
+	LTORG	
+		='2'	
+LOOP	READ	B	
+A	DS	1	
+B	DC	'1'	
+		='1'	
+	END	
+ 
+ 
